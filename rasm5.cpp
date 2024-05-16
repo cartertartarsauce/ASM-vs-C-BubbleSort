@@ -1,4 +1,4 @@
-// Carter Froning, RASM5
+// Carter Froning, RASM5, last updated 5-16-24
 // rasm5.cpp : Create a C++ driver that serves as a menu to call both your C++/ASM bubbleSort
 // functions and the C++/ASM insertionSort functions. Upload input from a text file and use it
 // to form an array of integers, to which we can select how to sort it. Each time we sort, we
@@ -17,12 +17,10 @@ extern "C" void a_bubbleSort(long long*,int);
 int main()
 {
     //each time the program is run, the output text files will reset to be empty
-    ifstream file("input.txt");
-    ofstream CBfile("c_bubblesort.txt");
-    ofstream ABfile("a_bubblesort.txt");
-//    ofstream CIfile("c_insertionsort.txt");
-//    ofstream AIfile("a_insertionsort.txt");
-    string line;                    //
+    ifstream file;   // "input.txt"
+    ofstream CBfile; // "c_bubblesort.txt"
+    ofstream ABfile; // "a_bubblesort.txt"
+    string line;     // temporary line variable
     int fileElemCount = 0;          //initialize file element number to 0
     int input = 0;                  //initialize user input to 0
     int CBTime = 0;                 //initialize C++ BubbleSort time
@@ -36,36 +34,38 @@ int main()
     //Loop to drive the menu
     while (input != 4)
     {
-        std::cout << endl; //<< endl << endl << endl << endl << endl << endl << endl << endl << endl;
+        std::cout << endl;
         std::cout << "               RASM 5: C vs Assembly" << endl;
         std::cout << "               File Element Count: " << fileElemCount << endl;
         std::cout << "------------------------------------------------------" << endl;
         std::cout << "C++ bubbleSort Time: " << CBTime << " ms" << endl;
         std::cout << "ASM bubbleSort Time: " << ABTime << " ms" << endl;
-//        std::cout << endl << "C++ insertSort Time: " << CITime << " ms" << endl;
-//        std::cout << "ASM insertSort Time: " << AITime << " ms" << endl;
         std::cout << "------------------------------------------------------" << endl;
-        std::cout << "<1> Load input file (integers)" << endl;
+        std::cout << "<1> Load input file (quads/long long ints)" << endl;
         std::cout << "<2> Sort using C++ bubbleSort Algorithm" << endl;
         std::cout << "<3> Sort using Assembly bubbleSort Algorithm" << endl;
-//        std::cout << "<4> Sort using C++ insertionSort algorithm" << endl;
-//        std::cout << "<5> Sort using Assembly insertionSort algorithm" << endl;
         std::cout << "<4> Quit" << endl << endl;
 
         //gather user input
         std::cout << "Enter a choice: ";
         cin >> input;
 
-        //switch statement (1-5):
+        //switch statement (1-4):
         switch (input)
         {
         case 1:
             std::cout << endl << "Loading input file..." << endl;
 
-            if (!file.is_open())
+            if (isArraySet)
             {
-                std::cout << "Error loading file.";
+                std::cout << "File already loaded.";
+                break;
             }
+
+            file.open("input.txt");
+
+            if (!file.is_open())
+                std::cout << "Error loading file.";
             else
             {
                 fileElemCount = 0;    //reset fileElement Counter to 0
@@ -100,10 +100,8 @@ int main()
             }
             isArraySet = true;
             break;
-
-        //CASE 2: C++ BUBBLESORT
-        case 2:
-
+    
+        case 2: //CASE 2: C++ BUBBLESORT
             //ensure the array is not empty before proceeding to call a sort on it
             if (!isArraySet)
             {
@@ -114,20 +112,21 @@ int main()
             {
                 std::cout << endl << "Sorting the array..." << endl;
 
-                //Call and time the C++ BubbleSort
+                //Call and set timer for the C++ BubbleSort
                 auto startTime = chrono::high_resolution_clock::now();
                 c_bubbleSort(quadArray, fileElemCount);
                 auto endTime = chrono::high_resolution_clock::now();
 
                 //calculate the time save as milliseconds
                 auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
-                CBTime = static_cast<int>(duration.count()); 
+                CBTime = static_cast<int>(duration.count());
 
                 std::cout << endl << "Done." << endl;
             }
 
-            //Now that its sorted, save them to c_bubblesort.txt
-            //CBfile = c_bubblesort.txt is where the sorted C Bubblesort function result gets stored
+            //CBfile is where the sorted C++ Bubblesort function result gets stored
+            CBfile.open("c_bubblesort.txt");
+            
             if (!CBfile.is_open())
             {
                 std::cout << "Error loading c_bubblesort.txt" << endl;
@@ -144,12 +143,16 @@ int main()
                 std::cout << endl << "Done." << endl;
             }
 
+            //DEALLOCATE ARRAY AFTER USING IT
+            delete[] quadArray;
+            quadArray = nullptr;
+            isArraySet = false;
+            fileElemCount = 0;
+
             break;
 
-        //CASE 3: ASM BUBBLESORT
-        case 3:
-           
-
+        case 3: //CASE 3: ASM BUBBLESORT
+            //ensure the array is not empty before proceeding to call a sort on it
             if (!isArraySet)
             {
                 std::cout << "Error: No elements in the array." << endl;
@@ -159,7 +162,7 @@ int main()
             {
                 std::cout << endl << "Sorting the array..." << endl;
 
-                //Call and time the C++ BubbleSort
+                //Call and set timer for the C++ BubbleSort
                 auto startTime = chrono::high_resolution_clock::now();
                 a_bubbleSort(quadArray, fileElemCount);
                 auto endTime = chrono::high_resolution_clock::now();
@@ -171,7 +174,7 @@ int main()
                 std::cout << endl << "Done." << endl;
             }
 
-            //ABfile = a_bubblesort.txt is where the sorted Assembly Bubblesort function result gets stored
+            //ABfile is where the sorted Assembly Bubblesort function result gets stored
             if (!ABfile.is_open())
             {
                 std::cout << "Error loading a_bubblesort.txt" << endl;
@@ -188,30 +191,26 @@ int main()
                 std::cout << endl << "Done." << endl;
             }
 
+            //DEALLOCATE ARRAY AFTER USING IT
+            delete[] quadArray;
+            quadArray = nullptr;
+            isArraySet = false;
+            fileElemCount = 0;
+
             break;
 
         case 4:
-            
+            //Code to quit program
             break;
-
-//        case 5:
-            
-//            break;
 
         default:
             std::cout << "Please enter a valid number 1-4..." << endl;
             break;
         }
 
+        //clear screen a bit each time before printing menu
         std::cout << endl << endl << endl << endl;
-        //cout << "ASM String length = " << String_length(str) << endl;
-
     }
     std::cout << "Quitting..." << endl;
-
-    //DEALLOCATE MEMORY
-    delete[] quadArray;
-
-
 }
 
